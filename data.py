@@ -1,10 +1,14 @@
+# +
 from __future__ import print_function
-from keras.preprocessing.image import ImageDataGenerator
+# from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
 import numpy as np 
 import os
 import glob
 import skimage.io as io
 import skimage.transform as trans
+# -
 
 Sky = [128,128,128]
 Building = [128,0,0]
@@ -82,14 +86,31 @@ def trainGenerator(batch_size,train_path,image_folder,mask_folder,aug_dict,image
 
 
 
-def testGenerator(test_path,num_image = 30,target_size = (256,256),flag_multi_class = False,as_gray = True):
-    for i in range(num_image):
-        img = io.imread(os.path.join(test_path,"%d.png"%i),as_gray = as_gray)
+def testGenerator(test_path, labels_path = "", num_image = 30,target_size = (256,256),flag_multi_class = False,as_gray = True):
+    all_files = glob.glob(test_path + "/*.png")
+    all_files = all_files[0:num_image]
+    for file_name in all_files:
+        sample_name =  file_name.split('/')[-1]
+        # print(sample_name)
+        img = io.imread(file_name,as_gray = as_gray)
         img = img / 255
         img = trans.resize(img,target_size)
         img = np.reshape(img,img.shape+(1,)) if (not flag_multi_class) else img
         img = np.reshape(img,(1,)+img.shape)
-        yield img
+
+        if(labels_path == ""):
+            yield img
+
+        else:
+            mask = io.imread( os.path.join(labels_path,sample_name) ,as_gray = as_gray)
+            mask = mask / 255
+            mask = trans.resize(mask,target_size)
+            mask = np.reshape(mask,mask.shape+(1,)) if (not flag_multi_class) else mask
+            mask = np.reshape(mask,(1,)+mask.shape)
+            mask[mask > 0.5] = 1
+            mask[mask <= 0.5] = 0
+            yield img, mask
+            
 
 
 def geneTrainNpy(image_path,mask_path,flag_multi_class = False,num_class = 2,image_prefix = "image",mask_prefix = "mask",image_as_gray = True,mask_as_gray = True):
@@ -118,7 +139,10 @@ def labelVisualize(num_class,color_dict,img):
 
 
 
-def saveResult(save_path,npyfile,flag_multi_class = False,num_class = 2):
+def saveResult(save_path, npyfile,test_path,flag_multi_class = False,num_class = 2):
+    all_files = glob.glob(test_path + "/*.png")
+    all_files = all_files[0:len(npyfile)]
     for i,item in enumerate(npyfile):
+        sample_name =  all_files[i].split('/')[-1]
         img = labelVisualize(num_class,COLOR_DICT,item) if flag_multi_class else item[:,:,0]
-        io.imsave(os.path.join(save_path,"%d_predict.png"%i),img)
+        io.imsave(os.path.join(save_path,sample_name),img)

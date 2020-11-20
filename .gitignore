@@ -1,0 +1,47 @@
+# IDE
+.idea/
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+
+# Project folders
+
+logs/
+DATA/
+data/
+
+
+data/membrane/
+
+
+
+.idea/
+
+__pycache__/
+
+boardai/localization/.ipynb_checkpoints/
+
+boardai/localization/model_check/
+
+/boardai/generator/*.hdf5
+/boardai/localization/out/
+
+# Singularity
+*.sif
+
+boardai/localization/model_check/
+
+boardai/localization/out/
+
+*.hdf5
+
+*.dat
+
+# Scripts
+*.sh
+
+relevant_text_files/.~lock.all_db_crops_df_FULL_DATASET_RGB_EXTENDED_CROP.csv#
